@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Pomodoro com Distrações</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1 id="state">Parado</h1>
+
+  <div id="studyTimer">50:00</div>
+
+  <p>📵 Distração: <span id="distractionTimer">00:00</span></p>
+  <p>🔁 Pomodoros: <span id="pomodoros">0</span>/4</p>
+
+  <button onclick="startStudy()">▶️ Estudar</button>
+  <button onclick="distract()">📱 Me distraí</button>
+  <button onclick="resetAll()">🔄 Resetar</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
