@@ -1,0 +1,18 @@
+body {
+  background: #111;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 40px;
+}
+
+#studyTimer {
+  font-size: 64px;
+  margin: 20px 0;
+}
+
+button {
+  font-size: 16px;
+  padding: 10px 20px;
+  margin: 5px;
+}
