@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Pomodoro com Distrações</title>
+  <meta charset="UTF-8" />
+  <title>Focus Timer</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1 id="state">Parado</h1>
+  <div class="status-pill" id="state">FOCANDO</div>
 
-  <div id="studyTimer">50:00</div>
+  <div class="timer" id="studyTimer">50:00</div>
 
-  <p>📵 Distração: <span id="distractionTimer">00:00</span></p>
-  <p>🔁 Pomodoros: <span id="pomodoros">0</span>/4</p>
+  <div class="stats">
+    <div class="stat red">
+      ⚠ Distração<br>
+      <span id="distractionTimer">00:00</span>
+    </div>
+    <div class="stat green">
+      ⚡ Ciclos<br>
+      <span><span id="pomodoros">0</span>/4</span>
+    </div>
+  </div>
 
-<button onclick="togglePause()" id="pauseBtn">▶️ Play</button>
-<button onclick="startStudy()">📚 Estudar</button>
-<button onclick="distract()">📱 Me distraí</button>
-<button onclick="resetAll()">🔄 Resetar</button>
+  <div class="controls">
+    <button class="btn danger" onclick="distract()">☕ Me Distrai</button>
+    <button class="btn ghost" onclick="togglePause()">⏯</button>
+    <button class="btn ghost" onclick="resetAll()">↻</button>
+  </div>
 
-  <script src="script.js"></script>
 </body>
+<script src="script.js"></script>
 </html>
