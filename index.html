@@ -12,19 +12,26 @@
   <div class="timer" id="studyTimer">50:00</div>
 
   <div class="stats">
-    <div class="red">
+    <div class="stat red">
       ⚠ Distração
       <span id="distractionTimer">00:00</span>
     </div>
-    <div class="green">
+    <div class="stat green">
       ⚡ Ciclos
-      <span><span id="pomodoros">0</span>/4</span>
+      <span><span id="pomodoros">0</span>/<span id="pomodoroMax">4</span></span>
     </div>
   </div>
 
   <div class="controls">
-    <button id="distractBtn" onclick="distract()">☕ Me Distrai</button>
-    <button id="focusBtn" onclick="focus()">▶️ Voltar a Focar</button>
+    <button id="distractBtn" class="danger" onclick="distract()">☕ Me Distrai</button>
+    <button id="focusBtn" class="success" onclick="returnToFocus()">▶️ Voltar a Focar</button>
+    <button class="ghost" onclick="togglePause()">⏯</button>
+    <button class="ghost" onclick="resetAll()">↻</button>
+  </div>
+
+  <div class="history">
+    <h3>Histórico</h3>
+    <ul id="historyList"></ul>
   </div>
 
   <script src="script.js"></script>
