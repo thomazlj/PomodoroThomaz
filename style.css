@@ -1,18 +1,87 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background: #111;
-  color: white;
-  font-family: Arial, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at bottom, #0f2f1f, #050505 60%);
+  color: #eaeaea;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+}
+
+/* STATUS */
+.status-pill {
+  background: #0f3;
+  color: #0a0;
+  padding: 8px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 40px;
+}
+
+/* TIMER */
+.timer {
+  font-size: 120px;
+  font-weight: 700;
+  color: #20e070;
+  text-shadow: 0 0 40px rgba(32, 224, 112, 0.4);
+  margin-bottom: 30px;
+}
+
+/* STATS */
+.stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.stat {
   text-align: center;
-  padding: 40px;
+  font-size: 14px;
 }
 
-#studyTimer {
-  font-size: 64px;
-  margin: 20px 0;
+.stat span {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
 }
 
-button {
+.stat.red span {
+  color: #ff4d4d;
+}
+
+.stat.green span {
+  color: #20e070;
+}
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 14px 22px;
   font-size: 16px;
-  padding: 10px 20px;
-  margin: 5px;
+  cursor: pointer;
+}
+
+.btn.danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn.ghost {
+  background: #111;
+  color: #aaa;
+  border: 1px solid #333;
 }
