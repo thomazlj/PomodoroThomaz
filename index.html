@@ -1,57 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Focus Timer</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Pomodoro</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div class="status" id="state">PAUSADO</div>
+  <div class="status" id="status">PAUSADO</div>
 
   <div class="timer" id="timer">50:00</div>
 
-  <div class="stats">
-    <div class="stat red">
-      ⚠ Distração
-      <span id="distraction">00:00</span>
-    </div>
-    <div class="stat green">
-      ⚡ Ciclos
-      <span class="inline">
-        <span id="cycles">0</span>/<span id="cyclesMax">4</span>
-      </span>
-    </div>
+  <div class="info">
+    <div>⚠️ Distração <span id="distraction">00:00</span></div>
+    <div>⚡ Ciclos <span id="cycles">0/4</span></div>
   </div>
 
   <div class="controls">
-    <button class="ghost" onclick="togglePlay()">▶️</button>
-    <button class="danger" onclick="distract()">☕</button>
-    <button class="ghost" onclick="skipFocus()">⏭ Foco</button>
-    <button class="ghost" onclick="skipBreak()">⏭ Descanso</button>
-    <button class="ghost" onclick="toggleAuto()" id="autoBtn">🔁</button>
-    <button class="ghost" onclick="resetAll()">↻</button>
+    <button id="play">▶️</button>
+    <button id="pause">⏸️</button>
+    <button id="skip">⏭️</button>
+    <button id="reset">🔄</button>
   </div>
 
-  <div class="options">
+  <div class="settings">
     ⏩ Velocidade:
-    <select onchange="setSpeed(this.value)">
+    <select id="speed">
       <option value="1">1x</option>
+      <option value="5">5x</option>
       <option value="10">10x</option>
       <option value="60">60x</option>
       <option value="300">300x</option>
     </select>
 
-    <div class="voice">
-      <button class="ghost" onclick="toggleVoice()">🎤</button>
-      <span id="voiceStatus">desligado</span>
-    </div>
+    <label>
+      <input type="checkbox" id="autoTransition" checked />
+      Transição automática
+    </label>
   </div>
 
-  <div class="history">
-    <h3>Histórico</h3>
-    <ul id="history"></ul>
+  <div class="voice">
+    🎤 <span id="voiceStatus">desligado</span>
   </div>
+
+  <div class="legend">
+    <strong>Comandos de voz:</strong><br />
+    “iniciar”<br />
+    “pausar”<br />
+    “pular foco”<br />
+    “pular descanso”<br />
+    “resetar”
+  </div>
+
+  <h2>Histórico</h2>
+  <button id="clearHistory">🗑️ Apagar histórico</button>
+  <ul id="history"></ul>
+
+  <audio id="beep">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">
+  </audio>
 
   <script src="script.js"></script>
 </body>
