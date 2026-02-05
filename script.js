@@ -18,19 +18,6 @@ let state = "study"; // study | distracted | break
 let paused = true;
 
 let speed = 1;
-let autoAdvance = true;
-
-// ===============================
-// SOM
-// ===============================
-const beep = new Audio(
-  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="
-);
-
-function playSound() {
-  beep.currentTime = 0;
-  beep.play();
-}
 
 // ===============================
 // UTIL
@@ -43,7 +30,9 @@ function formatTime(sec) {
 
 function now() {
   const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
 }
 
 // ===============================
@@ -63,7 +52,9 @@ function clearHistory() {
 // UI
 // ===============================
 function updateUI() {
-  document.getElementById("studyTimer").textContent =
+  const timerEl = document.getElementById("studyTimer");
+
+  timerEl.textContent =
     state === "break" ? formatTime(breakTime) : formatTime(studyTime);
 
   document.getElementById("distractionTimer").textContent =
@@ -73,9 +64,6 @@ function updateUI() {
   document.getElementById("pomodoroMax").textContent = POMODORO_MAX;
 
   const stateEl = document.getElementById("state");
-  const autoBtn = document.getElementById("autoBtn");
-
-  autoBtn.textContent = autoAdvance ? "Automática" : "Manual";
 
   if (paused) {
     stateEl.textContent = "PAUSADO";
@@ -113,11 +101,6 @@ function togglePause() {
   updateUI();
 }
 
-function toggleAuto() {
-  autoAdvance = !autoAdvance;
-  updateUI();
-}
-
 function setSpeed(val) {
   speed = Number(val);
 }
@@ -140,7 +123,11 @@ function returnToFocus() {
 
 function skipFocus() {
   if (state === "study") {
-    addHistory(`Foco pulado — ${formatTime(STUDY_TOTAL - studyTime)}`);
+    addHistory(
+      `Foco pulado — Foco: ${formatTime(
+        STUDY_TOTAL - studyTime
+      )} | Distração: ${formatTime(distractionTime)}`
+    );
     startBreak();
   }
 }
@@ -153,7 +140,12 @@ function skipBreak() {
 }
 
 function resetAll() {
-  addHistory("Sessão resetada");
+  addHistory(
+    `Sessão resetada — Foco: ${formatTime(
+      STUDY_TOTAL - studyTime
+    )} | Distração: ${formatTime(distractionTime)}`
+  );
+
   studyTime = STUDY_TOTAL;
   breakTime = SHORT_BREAK;
   distractionTime = 0;
@@ -167,29 +159,29 @@ function resetAll() {
 // TRANSIÇÕES
 // ===============================
 function startBreak() {
-  playSound();
-  addHistory("Foco concluído");
+  addHistory(
+    `Foco concluído — Foco: 50:00 | Distração: ${formatTime(distractionTime)}`
+  );
+
   pomodoros++;
-  breakTime = pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
+  breakTime =
+    pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
+
   distractionTime = 0;
   state = "break";
-
-  if (!autoAdvance) paused = true;
 }
 
 function startNextStudy() {
-  playSound();
   addHistory(
     breakTime === LONG_BREAK
-      ? "Descanso longo concluído"
-      : "Descanso concluído"
+      ? "Descanso longo concluído — 30:00"
+      : "Descanso concluído — 10:00"
   );
 
   studyTime = STUDY_TOTAL;
   breakTime = SHORT_BREAK;
   state = "study";
-
-  if (!autoAdvance) paused = true;
+  paused = true;
 }
 
 // ===============================
