@@ -1,104 +1,223 @@
-let mode = "focus"; // focus | break
-let running = false;
-let seconds = 50 * 60;
-let cycles = 0;
-let interval = null;
+// ===============================
+// CONFIG
+// ===============================
+const STUDY_TOTAL = 50 * 60;
+const SHORT_BREAK = 10 * 60;
+const LONG_BREAK = 30 * 60;
+const POMODORO_MAX = 4;
+
+// ===============================
+// ESTADO
+// ===============================
+let studyTime = STUDY_TOTAL;
+let breakTime = SHORT_BREAK;
+let distractionTime = 0;
+
+let pomodoros = 0;
+let state = "study"; // study | distracted | break
+let paused = true;
+
 let speed = 1;
+let autoAdvance = true;
 
-const timerEl = document.getElementById("timer");
-const statusEl = document.getElementById("status");
-const cyclesEl = document.getElementById("cycles");
-const distractionEl = document.getElementById("distraction");
-const historyEl = document.getElementById("history");
-const beep = document.getElementById("beep");
+// ===============================
+// SOM
+// ===============================
+const beep = new Audio(
+  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="
+);
 
-function format(sec) {
+function playSound() {
+  beep.currentTime = 0;
+  beep.play();
+}
+
+// ===============================
+// UTIL
+// ===============================
+function formatTime(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, "0");
   const s = String(sec % 60).padStart(2, "0");
   return `${m}:${s}`;
 }
 
-function updateUI() {
-  timerEl.textContent = format(seconds);
-  cyclesEl.textContent = `${cycles}/4`;
-
-  if (!running) {
-    statusEl.textContent = "PAUSADO";
-    timerEl.style.color = "#aaa";
-  } else if (mode === "focus") {
-    statusEl.textContent = "FOCO";
-    timerEl.style.color = "#3f3";
-  } else {
-    statusEl.textContent = "DESCANSO";
-    timerEl.style.color = "#4af";
-  }
+function now() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-function tick() {
-  seconds -= speed;
-  if (seconds <= 0) finishStage();
-  updateUI();
-}
-
-function start() {
-  if (running) return;
-  running = true;
-  interval = setInterval(tick, 1000);
-  updateUI();
-}
-
-function pause() {
-  running = false;
-  clearInterval(interval);
-  updateUI();
-}
-
-function finishStage() {
-  pause();
-  beep.play();
-  saveHistory();
-
-  if (mode === "focus") {
-    cycles++;
-    mode = "break";
-    seconds = cycles % 4 === 0 ? 30 * 60 : 10 * 60;
-  } else {
-    mode = "focus";
-    seconds = 50 * 60;
-  }
-
-  updateUI();
-}
-
-function skipStage() {
-  finishStage();
-}
-
-function reset() {
-  pause();
-  mode = "focus";
-  seconds = 50 * 60;
-  cycles = 0;
-  updateUI();
-}
-
-function saveHistory() {
+// ===============================
+// HISTÓRICO
+// ===============================
+function addHistory(text) {
   const li = document.createElement("li");
-  li.textContent = `${new Date().toLocaleTimeString()} — ${mode}`;
-  historyEl.prepend(li);
+  li.textContent = `${now()} — ${text}`;
+  document.getElementById("historyList").prepend(li);
 }
 
-document.getElementById("play").onclick = start;
-document.getElementById("pause").onclick = pause;
-document.getElementById("skip").onclick = skipStage;
-document.getElementById("reset").onclick = reset;
+function clearHistory() {
+  document.getElementById("historyList").innerHTML = "";
+}
 
-document.getElementById("speed").onchange = e => {
-  speed = Number(e.target.value);
-};
+// ===============================
+// UI
+// ===============================
+function updateUI() {
+  document.getElementById("studyTimer").textContent =
+    state === "break" ? formatTime(breakTime) : formatTime(studyTime);
 
-document.getElementById("clearHistory").onclick = () => {
-  historyEl.innerHTML = "";
-};
+  document.getElementById("distractionTimer").textContent =
+    formatTime(distractionTime);
 
+  document.getElementById("pomodoros").textContent = pomodoros;
+  document.getElementById("pomodoroMax").textContent = POMODORO_MAX;
+
+  const stateEl = document.getElementById("state");
+  const autoBtn = document.getElementById("autoBtn");
+
+  autoBtn.textContent = autoAdvance ? "Automática" : "Manual";
+
+  if (paused) {
+    stateEl.textContent = "PAUSADO";
+    stateEl.style.background = "#555";
+  } else if (state === "study") {
+    stateEl.textContent = "FOCANDO";
+    stateEl.style.background = "#20e070";
+  } else if (state === "break") {
+    stateEl.textContent =
+      breakTime === LONG_BREAK ? "DESCANSO LONGO" : "DESCANSO";
+    stateEl.style.background = "#3498db";
+  } else {
+    stateEl.textContent = "DISTRAÍDO";
+    stateEl.style.background = "#ff4d4d";
+  }
+
+  document.getElementById("distractBtn").style.display =
+    !paused && state === "study" ? "inline-block" : "none";
+
+  document.getElementById("focusBtn").style.display =
+    !paused && state === "distracted" ? "inline-block" : "none";
+
+  document.getElementById("skipBreakBtn").style.display =
+    !paused && state === "break" ? "inline-block" : "none";
+
+  document.getElementById("skipFocusBtn").style.display =
+    !paused && state === "study" ? "inline-block" : "none";
+}
+
+// ===============================
+// CONTROLES
+// ===============================
+function togglePause() {
+  paused = !paused;
+  updateUI();
+}
+
+function toggleAuto() {
+  autoAdvance = !autoAdvance;
+  updateUI();
+}
+
+function setSpeed(val) {
+  speed = Number(val);
+}
+
+function distract() {
+  if (!paused && state === "study") {
+    state = "distracted";
+    addHistory("Entrou em distração");
+    updateUI();
+  }
+}
+
+function returnToFocus() {
+  if (!paused && state === "distracted") {
+    state = "study";
+    addHistory("Voltou a focar");
+    updateUI();
+  }
+}
+
+function skipFocus() {
+  if (state === "study") {
+    addHistory(`Foco pulado — ${formatTime(STUDY_TOTAL - studyTime)}`);
+    startBreak();
+  }
+}
+
+function skipBreak() {
+  if (state === "break") {
+    addHistory("Descanso pulado");
+    startNextStudy();
+  }
+}
+
+function resetAll() {
+  addHistory("Sessão resetada");
+  studyTime = STUDY_TOTAL;
+  breakTime = SHORT_BREAK;
+  distractionTime = 0;
+  pomodoros = 0;
+  state = "study";
+  paused = true;
+  updateUI();
+}
+
+// ===============================
+// TRANSIÇÕES
+// ===============================
+function startBreak() {
+  playSound();
+  addHistory("Foco concluído");
+  pomodoros++;
+  breakTime = pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
+  distractionTime = 0;
+  state = "break";
+
+  if (!autoAdvance) paused = true;
+}
+
+function startNextStudy() {
+  playSound();
+  addHistory(
+    breakTime === LONG_BREAK
+      ? "Descanso longo concluído"
+      : "Descanso concluído"
+  );
+
+  studyTime = STUDY_TOTAL;
+  breakTime = SHORT_BREAK;
+  state = "study";
+
+  if (!autoAdvance) paused = true;
+}
+
+// ===============================
+// LOOP
+// ===============================
+setInterval(() => {
+  if (paused) return;
+
+  for (let i = 0; i < speed; i++) {
+    if (state === "study") {
+      studyTime--;
+      if (studyTime <= 0) {
+        startBreak();
+        break;
+      }
+    } else if (state === "break") {
+      breakTime--;
+      if (breakTime <= 0) {
+        startNextStudy();
+        break;
+      }
+    } else if (state === "distracted") {
+      distractionTime++;
+    }
+  }
+
+  updateUI();
+}, 1000);
+
+// INIT
 updateUI();
