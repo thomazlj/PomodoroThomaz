@@ -1,77 +1,49 @@
 body {
-  background: radial-gradient(circle at bottom, #0f2f1f, #050505 60%);
-  color: #eee;
-  font-family: system-ui, sans-serif;
+  background: radial-gradient(circle at center, #062 0%, #000 70%);
+  color: #fff;
+  font-family: Arial, sans-serif;
   text-align: center;
-  padding-top: 30px;
 }
 
 .status {
-  padding: 6px 18px;
-  border-radius: 999px;
-  margin-bottom: 20px;
+  margin-top: 20px;
+  font-size: 18px;
 }
 
 .timer {
-  font-size: 110px;
+  font-size: 96px;
+  margin: 20px 0;
+}
+
+.info {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
   margin-bottom: 20px;
 }
 
-.stats {
-  display: flex;
-  justify-content: center;
-  gap: 80px;
-  margin-bottom: 20px;
+.controls button {
+  font-size: 20px;
+  margin: 5px;
 }
 
-.stat span {
-  display: block;
-  font-size: 22px;
+.settings {
+  margin: 15px;
 }
 
-.inline {
-  display: flex;
-  gap: 4px;
-  justify-content: center;
+.voice {
+  margin-top: 10px;
 }
 
-.red span { color: #ff4d4d; }
-.green span { color: #20e070; }
-
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+.legend {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-size: 12px;
+  opacity: 0.7;
 }
 
-button {
-  padding: 12px 16px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-}
-
-.ghost {
-  background: #111;
-  color: #aaa;
-  border: 1px solid #333;
-}
-
-.danger {
-  background: #e74c3c;
-  color: white;
-}
-
-.options {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 20px;
-}
-
-.history {
-  max-width: 300px;
-  margin: auto;
-  text-align: left;
+#history {
+  list-style: none;
+  padding: 0;
 }
