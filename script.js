@@ -20,8 +20,9 @@ let paused = true;
 let speed = 1;
 let autoStart = false;
 
-// flags de controle
+// flags
 let focusStartedLogged = false;
+let breakStartedLogged = false;
 
 // ===============================
 // AUDIO
@@ -133,6 +134,13 @@ function togglePause() {
     if (state === "study" && studyTime === STUDY_TOTAL && !focusStartedLogged) {
       addHistory("Foco iniciado");
       focusStartedLogged = true;
+    } else if (state === "break" && !breakStartedLogged) {
+      addHistory(
+        breakTime === LONG_BREAK
+          ? "Descanso iniciado — 30:00"
+          : "Descanso iniciado — 10:00"
+      );
+      breakStartedLogged = true;
     } else {
       addHistory("▶️ Play");
     }
@@ -141,6 +149,7 @@ function togglePause() {
     paused = true;
     addHistory("⏸ Pause");
   }
+
   updateUI();
 }
 
@@ -194,6 +203,7 @@ function resetAll() {
   distractionTime = 0;
   pomodoros = 0;
   focusStartedLogged = false;
+  breakStartedLogged = false;
   state = "study";
   paused = true;
   updateUI();
@@ -213,15 +223,19 @@ function startBreak(playSound = true) {
   breakTime = pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
   distractionTime = 0;
   state = "break";
+  breakStartedLogged = false;
   focusStartedLogged = false;
 
-  addHistory(
-    breakTime === LONG_BREAK
-      ? "Descanso iniciado — 30:00"
-      : "Descanso iniciado — 10:00"
-  );
-
   paused = !autoStart;
+
+  if (autoStart) {
+    addHistory(
+      breakTime === LONG_BREAK
+        ? "Descanso iniciado — 30:00"
+        : "Descanso iniciado — 10:00"
+    );
+    breakStartedLogged = true;
+  }
 }
 
 function startNextStudy(playSound = true) {
@@ -237,6 +251,7 @@ function startNextStudy(playSound = true) {
   breakTime = SHORT_BREAK;
   state = "study";
   paused = !autoStart;
+  focusStartedLogged = false;
 }
 
 // ===============================
