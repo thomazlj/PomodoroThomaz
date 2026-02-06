@@ -18,7 +18,40 @@ let state = "study"; // study | distracted | break
 let paused = true;
 
 let speed = 1;
-let autoStart = false; // <<< CONTROLE PRINCIPAL
+let autoStart = false;
+
+// ===============================
+// AUDIO (BEEP)
+// ===============================
+let audioCtx = null;
+
+function beep(duration = 200, frequency = 880, volume = 0.2) {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.frequency.value = frequency;
+  oscillator.type = "sine";
+  gainNode.gain.value = volume;
+
+  oscillator.start();
+  oscillator.stop(audioCtx.currentTime + duration / 1000);
+}
+
+function focusEndSound() {
+  beep(200, 880);
+  setTimeout(() => beep(200, 880), 300);
+}
+
+function breakEndSound() {
+  beep(500, 523);
+}
 
 // ===============================
 // UTIL
@@ -131,14 +164,14 @@ function skipFocus() {
     addHistory(
       `Foco pulado — Foco: ${formatTime(STUDY_TOTAL - studyTime)} | Distração: ${formatTime(distractionTime)}`
     );
-    startBreak();
+    startBreak(false);
   }
 }
 
 function skipBreak() {
   if (state === "break") {
     addHistory("Descanso pulado");
-    startNextStudy();
+    startNextStudy(false);
   }
 }
 
@@ -158,7 +191,9 @@ function resetAll() {
 // ===============================
 // TRANSIÇÕES
 // ===============================
-function startBreak() {
+function startBreak(playSound = true) {
+  if (playSound) focusEndSound();
+
   addHistory(
     `Foco concluído — Foco: 50:00 | Distração: ${formatTime(distractionTime)}`
   );
@@ -170,7 +205,9 @@ function startBreak() {
   paused = !autoStart;
 }
 
-function startNextStudy() {
+function startNextStudy(playSound = true) {
+  if (playSound) breakEndSound();
+
   addHistory(
     breakTime === LONG_BREAK
       ? "Descanso longo concluído — 30:00"
@@ -193,13 +230,13 @@ setInterval(() => {
     if (state === "study") {
       studyTime--;
       if (studyTime <= 0) {
-        startBreak();
+        startBreak(true);
         break;
       }
     } else if (state === "break") {
       breakTime--;
       if (breakTime <= 0) {
-        startNextStudy();
+        startNextStudy(true);
         break;
       }
     } else if (state === "distracted") {
