@@ -18,6 +18,7 @@ let state = "study"; // study | distracted | break
 let paused = true;
 
 let speed = 1;
+let autoStart = false; // <<< CONTROLE PRINCIPAL
 
 // ===============================
 // UTIL
@@ -30,9 +31,7 @@ function formatTime(sec) {
 
 function now() {
   const d = new Date();
-  const h = String(d.getHours()).padStart(2, "0");
-  const m = String(d.getMinutes()).padStart(2, "0");
-  return `${h}:${m}`;
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
 
 // ===============================
@@ -52,9 +51,7 @@ function clearHistory() {
 // UI
 // ===============================
 function updateUI() {
-  const timerEl = document.getElementById("studyTimer");
-
-  timerEl.textContent =
+  document.getElementById("studyTimer").textContent =
     state === "break" ? formatTime(breakTime) : formatTime(studyTime);
 
   document.getElementById("distractionTimer").textContent =
@@ -91,6 +88,9 @@ function updateUI() {
 
   document.getElementById("skipFocusBtn").style.display =
     !paused && state === "study" ? "inline-block" : "none";
+
+  document.getElementById("autoStartBtn").textContent =
+    autoStart ? "ON" : "OFF";
 }
 
 // ===============================
@@ -98,6 +98,11 @@ function updateUI() {
 // ===============================
 function togglePause() {
   paused = !paused;
+  updateUI();
+}
+
+function toggleAutoStart() {
+  autoStart = !autoStart;
   updateUI();
 }
 
@@ -124,9 +129,7 @@ function returnToFocus() {
 function skipFocus() {
   if (state === "study") {
     addHistory(
-      `Foco pulado — Foco: ${formatTime(
-        STUDY_TOTAL - studyTime
-      )} | Distração: ${formatTime(distractionTime)}`
+      `Foco pulado — Foco: ${formatTime(STUDY_TOTAL - studyTime)} | Distração: ${formatTime(distractionTime)}`
     );
     startBreak();
   }
@@ -141,11 +144,8 @@ function skipBreak() {
 
 function resetAll() {
   addHistory(
-    `Sessão resetada — Foco: ${formatTime(
-      STUDY_TOTAL - studyTime
-    )} | Distração: ${formatTime(distractionTime)}`
+    `Sessão resetada — Foco: ${formatTime(STUDY_TOTAL - studyTime)} | Distração: ${formatTime(distractionTime)}`
   );
-
   studyTime = STUDY_TOTAL;
   breakTime = SHORT_BREAK;
   distractionTime = 0;
@@ -164,11 +164,10 @@ function startBreak() {
   );
 
   pomodoros++;
-  breakTime =
-    pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
-
+  breakTime = pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
   distractionTime = 0;
   state = "break";
+  paused = !autoStart;
 }
 
 function startNextStudy() {
@@ -181,7 +180,7 @@ function startNextStudy() {
   studyTime = STUDY_TOTAL;
   breakTime = SHORT_BREAK;
   state = "study";
-  paused = true;
+  paused = !autoStart;
 }
 
 // ===============================
