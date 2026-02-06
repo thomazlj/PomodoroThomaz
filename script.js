@@ -20,8 +20,11 @@ let paused = true;
 let speed = 1;
 let autoStart = false;
 
+// flags de controle
+let focusStartedLogged = false;
+
 // ===============================
-// AUDIO (BEEP)
+// AUDIO
 // ===============================
 let audioCtx = null;
 
@@ -29,19 +32,14 @@ function beep(duration = 200, frequency = 880, volume = 0.2) {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-
-  oscillator.frequency.value = frequency;
-  oscillator.type = "sine";
-  gainNode.gain.value = volume;
-
-  oscillator.start();
-  oscillator.stop(audioCtx.currentTime + duration / 1000);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.frequency.value = frequency;
+  gain.gain.value = volume;
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration / 1000);
 }
 
 function focusEndSound() {
@@ -93,21 +91,20 @@ function updateUI() {
   document.getElementById("pomodoros").textContent = pomodoros;
   document.getElementById("pomodoroMax").textContent = POMODORO_MAX;
 
-  const stateEl = document.getElementById("state");
+  const s = document.getElementById("state");
 
   if (paused) {
-    stateEl.textContent = "PAUSADO";
-    stateEl.style.background = "#555";
+    s.textContent = "PAUSADO";
+    s.style.background = "#555";
   } else if (state === "study") {
-    stateEl.textContent = "FOCANDO";
-    stateEl.style.background = "#20e070";
+    s.textContent = "FOCANDO";
+    s.style.background = "#20e070";
   } else if (state === "break") {
-    stateEl.textContent =
-      breakTime === LONG_BREAK ? "DESCANSO LONGO" : "DESCANSO";
-    stateEl.style.background = "#3498db";
+    s.textContent = breakTime === LONG_BREAK ? "DESCANSO LONGO" : "DESCANSO";
+    s.style.background = "#3498db";
   } else {
-    stateEl.textContent = "DISTRAÍDO";
-    stateEl.style.background = "#ff4d4d";
+    s.textContent = "DISTRAÍDO";
+    s.style.background = "#ff4d4d";
   }
 
   document.getElementById("distractBtn").style.display =
@@ -130,7 +127,20 @@ function updateUI() {
 // CONTROLES
 // ===============================
 function togglePause() {
-  paused = !paused;
+  if (paused) {
+    paused = false;
+
+    if (state === "study" && studyTime === STUDY_TOTAL && !focusStartedLogged) {
+      addHistory("Foco iniciado");
+      focusStartedLogged = true;
+    } else {
+      addHistory("▶️ Play");
+    }
+
+  } else {
+    paused = true;
+    addHistory("⏸ Pause");
+  }
   updateUI();
 }
 
@@ -139,8 +149,8 @@ function toggleAutoStart() {
   updateUI();
 }
 
-function setSpeed(val) {
-  speed = Number(val);
+function setSpeed(v) {
+  speed = Number(v);
 }
 
 function distract() {
@@ -183,6 +193,7 @@ function resetAll() {
   breakTime = SHORT_BREAK;
   distractionTime = 0;
   pomodoros = 0;
+  focusStartedLogged = false;
   state = "study";
   paused = true;
   updateUI();
@@ -202,6 +213,14 @@ function startBreak(playSound = true) {
   breakTime = pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
   distractionTime = 0;
   state = "break";
+  focusStartedLogged = false;
+
+  addHistory(
+    breakTime === LONG_BREAK
+      ? "Descanso iniciado — 30:00"
+      : "Descanso iniciado — 10:00"
+  );
+
   paused = !autoStart;
 }
 
