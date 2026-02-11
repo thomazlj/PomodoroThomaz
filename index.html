@@ -29,22 +29,21 @@
     <button id="skipBreakBtn" class="ghost" onclick="skipBreak()">⏭ Pular Descanso</button>
     <button class="ghost" onclick="togglePause()">⏯</button>
     <button class="ghost" onclick="resetAll()">↻</button>
+    <button class="ghost" onclick="togglePiP()">🗔 PiP</button>
   </div>
 
   <div style="margin-bottom:15px;">
     ⚙️ Início automático:
-    <button class="ghost" onclick="toggleAutoStart()" id="autoStartBtn">
-      OFF
-    </button>
+    <button class="ghost" onclick="toggleAutoStart()" id="autoStartBtn">OFF</button>
   </div>
 
   <div style="margin-bottom:20px;">
     ⏩ Velocidade:
     <select onchange="setSpeed(this.value)">
       <option value="1">1x</option>
+      <option value="5">5x</option>
       <option value="10">10x</option>
-      <option value="60">60x</option>
-      <option value="300">300x (5min)</option>
+      <option value="60">60x (teste)</option>
     </select>
   </div>
 
@@ -55,6 +54,9 @@
     </div>
     <ul id="historyList"></ul>
   </div>
+
+  <!-- vídeo invisível para PiP -->
+  <video id="pipVideo" muted playsinline style="display:none;"></video>
 
   <script src="script.js"></script>
 </body>
