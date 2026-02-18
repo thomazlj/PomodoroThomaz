@@ -1,60 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Focus Timer</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="container">
+  <div class="status" id="state">PAUSADO</div>
 
-    <div id="stateLabel" class="state paused">PAUSADO</div>
+  <div class="timer" id="studyTimer">50:00</div>
 
-    <!-- 🔥 NOVO: TOTAL DO DIA -->
-    <div class="daily-total">
-      ⏱️ Total: <span id="dailyTotal">00:00</span>
+  <div class="stats">
+    <div class="stat red">
+      ⚠ Distração
+      <span id="distractionTimer">00:00</span>
     </div>
-
-    <div id="timer" class="timer">50:00</div>
-
-    <!-- 🔧 ALINHADO -->
-    <div class="info-row">
-      <div class="info-item">
-        ⚠ Distração <span id="distractionTime">00:00</span>
-      </div>
-      <div class="info-item">
-        ⚡ Ciclos <span id="cycleCount">0/4</span>
-      </div>
+    <div class="stat green">
+      ⚡ Ciclos
+      <span><span id="pomodoros">0</span>/<span id="pomodoroMax">4</span></span>
     </div>
-
-    <div class="controls">
-      <button id="playPauseBtn">▶</button>
-      <button id="resetBtn">↺</button>
-      <button id="pipBtn">PiP</button>
-      <!-- 🔥 NOVO -->
-      <button id="resetDayBtn">🗓️ Zerar Dia</button>
-    </div>
-
-    <div class="settings">
-      ⚙ Início automático:
-      <button id="autoStartBtn">OFF</button>
-
-      <div>
-        ⏩ Velocidade:
-        <select id="speedSelect">
-          <option value="1">1x</option>
-          <option value="2">2x</option>
-          <option value="5">5x</option>
-        </select>
-      </div>
-    </div>
-
-    <h2>Histórico</h2>
-    <button id="clearHistoryBtn">Limpar</button>
-    <ul id="historyList"></ul>
-
   </div>
+
+  <div class="controls">
+    <button id="distractBtn" class="danger" onclick="distract()">☕ Me Distrai</button>
+    <button id="focusBtn" class="success" onclick="returnToFocus()">▶️ Voltar a Focar</button>
+    <button id="skipFocusBtn" class="ghost" onclick="skipFocus()">⏭ Pular Foco</button>
+    <button id="skipBreakBtn" class="ghost" onclick="skipBreak()">⏭ Pular Descanso</button>
+    <button class="ghost" onclick="togglePause()">⏯</button>
+    <button class="ghost" onclick="resetAll()">↻</button>
+    <button class="ghost" onclick="togglePiP()">🗔 PiP</button>
+  </div>
+
+  <div style="margin-bottom:15px;">
+    ⚙️ Início automático:
+    <button class="ghost" onclick="toggleAutoStart()" id="autoStartBtn">OFF</button>
+  </div>
+
+  <div style="margin-bottom:20px;">
+    ⏩ Velocidade:
+    <select onchange="setSpeed(this.value)">
+      <option value="1">1x</option>
+      <option value="5">5x</option>
+      <option value="10">10x</option>
+      <option value="60">60x (teste)</option>
+    </select>
+  </div>
+
+  <div class="history">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>Histórico</h3>
+      <button class="ghost" onclick="clearHistory()">🗑 Limpar</button>
+    </div>
+    <ul id="historyList"></ul>
+  </div>
+
+  <!-- vídeo invisível para PiP -->
+  <video id="pipVideo" muted playsinline style="display:none;"></video>
 
   <script src="script.js"></script>
 </body>
