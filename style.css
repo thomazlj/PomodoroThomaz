@@ -17,21 +17,10 @@ body {
   margin-bottom: 30px;
 }
 
-.timer-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .timer {
   font-size: 120px;
   color: #20e070;
-  margin-bottom: 5px;
-}
-
-.daily-total {
-  font-size: 18px;
-  color: #aaa;
+  margin-bottom: 20px;
 }
 
 .stats {
@@ -57,8 +46,6 @@ body {
   display: flex;
   gap: 15px;
   margin-bottom: 40px;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 button {
