@@ -11,12 +11,6 @@
 
   <div class="timer" id="studyTimer">50:00</div>
 
-  <!-- ⏱️ TOTAL DO DIA -->
-  <div class="totalDay">
-    ⏱️ Total do dia
-    <span id="totalDayTimer">00:00</span>
-  </div>
-
   <div class="stats">
     <div class="stat red">
       ⚠ Distração
@@ -36,9 +30,6 @@
     <button class="ghost" onclick="togglePause()">⏯</button>
     <button class="ghost" onclick="resetAll()">↻</button>
     <button class="ghost" onclick="togglePiP()">🗔 PiP</button>
-
-    <!-- 🔹 NOVO BOTÃO -->
-    <button class="ghost" onclick="resetDayTotal()">Zerar Dia</button>
   </div>
 
   <div style="margin-bottom:15px;">
@@ -64,6 +55,7 @@
     <ul id="historyList"></ul>
   </div>
 
+  <!-- vídeo invisível para PiP -->
   <video id="pipVideo" muted playsinline style="display:none;"></video>
 
   <script src="script.js"></script>
