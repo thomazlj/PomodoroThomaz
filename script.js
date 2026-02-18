@@ -23,6 +23,7 @@ let autoStart = false;
 // flags
 let focusStartedLogged = false;
 let breakStartedLogged = false;
+let isLongBreak = false; // ✅ correção #3
 
 // ===============================
 // AUDIO
@@ -101,7 +102,7 @@ function updateUI() {
     s.textContent = "FOCANDO";
     s.style.background = "#20e070";
   } else if (state === "break") {
-    s.textContent = breakTime === LONG_BREAK ? "DESCANSO LONGO" : "DESCANSO";
+    s.textContent = isLongBreak ? "DESCANSO LONGO" : "DESCANSO";
     s.style.background = "#3498db";
   } else {
     s.textContent = "DISTRAÍDO";
@@ -123,7 +124,7 @@ function updateUI() {
   document.getElementById("autoStartBtn").textContent =
     autoStart ? "ON" : "OFF";
 
-  drawPiP(); // <<< atualização do PiP
+  drawPiP();
 }
 
 // ===============================
@@ -138,7 +139,7 @@ function togglePause() {
       focusStartedLogged = true;
     } else if (state === "break" && !breakStartedLogged) {
       addHistory(
-        breakTime === LONG_BREAK
+        isLongBreak
           ? "Descanso iniciado — 30:00"
           : "Descanso iniciado — 10:00"
       );
@@ -185,14 +186,14 @@ function skipFocus() {
     addHistory(
       `Foco pulado — Foco: ${formatTime(STUDY_TOTAL - studyTime)} | Distração: ${formatTime(distractionTime)}`
     );
-    startBreak(false);
+    startBreak(false, true); // ✅ correção #1
   }
 }
 
 function skipBreak() {
   if (state === "break") {
     addHistory("Descanso pulado");
-    startNextStudy(false);
+    startNextStudy(false, true); // ✅ correção #2
   }
 }
 
@@ -206,6 +207,7 @@ function resetAll() {
   pomodoros = 0;
   focusStartedLogged = false;
   breakStartedLogged = false;
+  isLongBreak = false;
   state = "study";
   paused = true;
   updateUI();
@@ -214,15 +216,19 @@ function resetAll() {
 // ===============================
 // TRANSIÇÕES
 // ===============================
-function startBreak(playSound = true) {
+function startBreak(playSound = true, skipped = false) {
   if (playSound) focusEndSound();
 
-  addHistory(
-    `Foco concluído — Foco: 50:00 | Distração: ${formatTime(distractionTime)}`
-  );
+  if (!skipped) {
+    addHistory(
+      `Foco concluído — Foco: 50:00 | Distração: ${formatTime(distractionTime)}`
+    );
+  }
 
   pomodoros++;
-  breakTime = pomodoros % POMODORO_MAX === 0 ? LONG_BREAK : SHORT_BREAK;
+  isLongBreak = pomodoros % POMODORO_MAX === 0;
+  breakTime = isLongBreak ? LONG_BREAK : SHORT_BREAK;
+
   distractionTime = 0;
   state = "break";
   breakStartedLogged = false;
@@ -232,7 +238,7 @@ function startBreak(playSound = true) {
 
   if (autoStart) {
     addHistory(
-      breakTime === LONG_BREAK
+      isLongBreak
         ? "Descanso iniciado — 30:00"
         : "Descanso iniciado — 10:00"
     );
@@ -240,17 +246,21 @@ function startBreak(playSound = true) {
   }
 }
 
-function startNextStudy(playSound = true) {
+function startNextStudy(playSound = true, skipped = false) {
   if (playSound) breakEndSound();
 
-  addHistory(
-    breakTime === LONG_BREAK
-      ? "Descanso longo concluído — 30:00"
-      : "Descanso concluído — 10:00"
-  );
+  if (!skipped) {
+    addHistory(
+      isLongBreak
+        ? "Descanso longo concluído — 30:00"
+        : "Descanso concluído — 10:00"
+    );
+  }
 
   studyTime = STUDY_TOTAL;
   breakTime = SHORT_BREAK;
+  isLongBreak = false;
+  focusStartedLogged = false; // ✅ correção #5
   state = "study";
   paused = !autoStart;
 }
@@ -265,13 +275,13 @@ setInterval(() => {
     if (state === "study") {
       studyTime--;
       if (studyTime <= 0) {
-        startBreak(true);
+        startBreak(true, false);
         break;
       }
     } else if (state === "break") {
       breakTime--;
       if (breakTime <= 0) {
-        startNextStudy(true);
+        startNextStudy(true, false);
         break;
       }
     } else if (state === "distracted") {
@@ -316,7 +326,7 @@ function drawPiP() {
       : state === "study"
       ? "FOCANDO"
       : state === "break"
-      ? "DESCANSO"
+      ? (isLongBreak ? "DESCANSO LONGO" : "DESCANSO")
       : "DISTRAÍDO",
     200,
     40
