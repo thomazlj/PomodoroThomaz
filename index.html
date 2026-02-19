@@ -9,7 +9,12 @@
 
   <div class="status" id="state">PAUSADO</div>
 
-  <div class="timer" id="studyTimer">50:00</div>
+  <div style="display:flex; align-items:baseline; gap:20px;">
+    <div class="timer" id="studyTimer">50:00</div>
+    <div style="font-size:22px; opacity:0.8;">
+      ⏱️ Total: <span id="totalFocus">00:00</span>
+    </div>
+  </div>
 
   <div class="stats">
     <div class="stat red">
@@ -55,7 +60,6 @@
     <ul id="historyList"></ul>
   </div>
 
-  <!-- vídeo invisível para PiP -->
   <video id="pipVideo" muted playsinline style="display:none;"></video>
 
   <script src="script.js"></script>
