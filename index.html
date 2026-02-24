@@ -9,11 +9,17 @@
 
   <div class="status" id="state">PAUSADO</div>
 
-  <div style="display:flex; align-items:baseline; gap:20px;">
-    <div class="timer" id="studyTimer">50:00</div>
-    <div style="font-size:22px; opacity:0.8;">
-      ⏱️ Total: <span id="totalFocus">00:00</span>
+  <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+
+    <div style="display:flex; align-items:baseline; gap:20px;">
+      <div class="timer" id="studyTimer">50:00</div>
     </div>
+
+    <div style="display:flex; gap:25px; font-size:20px; opacity:0.85;">
+      <div>⏱️ Foco Total: <span id="totalFocus">00:00</span></div>
+      <div>🚨 Distração Total: <span id="totalDistraction">00:00</span></div>
+    </div>
+
   </div>
 
   <div class="stats">
