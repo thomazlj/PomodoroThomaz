@@ -13,7 +13,8 @@ let studyTime = STUDY_TOTAL;
 let breakTime = SHORT_BREAK;
 let distractionTime = 0;
 
-let totalFocusSeconds = 0; // ✅ NOVO
+let totalFocusSeconds = 0;
+let totalDistractionSeconds = 0;
 
 let pomodoros = 0;
 let state = "study";
@@ -99,6 +100,9 @@ function updateUI() {
 
   document.getElementById("totalFocus").textContent =
     formatTotalTime(totalFocusSeconds);
+
+  document.getElementById("totalDistraction").textContent =
+    formatTotalTime(totalDistractionSeconds);
 
   document.getElementById("pomodoros").textContent = pomodoros;
   document.getElementById("pomodoroMax").textContent = POMODORO_MAX;
@@ -282,26 +286,37 @@ setInterval(() => {
   if (paused) return;
 
   for (let i = 0; i < speed; i++) {
+
     if (state === "study") {
       studyTime--;
-      totalFocusSeconds++; // ✅ acumula foco real
+      totalFocusSeconds++;
 
       if (totalFocusSeconds % 3600 === 0) {
-        addHistory(`⏱️ Total acumulado: ${formatTotalTime(totalFocusSeconds)}`);
+        addHistory(`⏱️ Foco total acumulado: ${formatTotalTime(totalFocusSeconds)}`);
       }
 
       if (studyTime <= 0) {
         startBreak(true, false);
         break;
       }
+
     } else if (state === "break") {
+
       breakTime--;
       if (breakTime <= 0) {
         startNextStudy(true, false);
         break;
       }
+
     } else if (state === "distracted") {
+
       distractionTime++;
+      totalDistractionSeconds++;
+
+      if (totalDistractionSeconds % 3600 === 0) {
+        addHistory(`🚨 Distração total acumulada: ${formatTotalTime(totalDistractionSeconds)}`);
+      }
+
     }
   }
 
