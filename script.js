@@ -141,6 +141,12 @@ function addDailyTime(type, seconds = 1) {
   saveDailyStats();
 }
 
+// Carrega os totais de hoje nos contadores visíveis
+const todayStatsOnLoad = ensureTodayStats();
+
+totalFocusSeconds = todayStatsOnLoad.focus || 0;
+totalDistractionSeconds = todayStatsOnLoad.distraction || 0;
+
 // ===============================
 // HISTÓRICO
 // ===============================
