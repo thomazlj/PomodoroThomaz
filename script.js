@@ -15,6 +15,7 @@ let distractionTime = 0;
 
 let totalFocusSeconds = 0;
 let totalDistractionSeconds = 0;
+let sessionHasStarted = false;
 
 let pomodoros = 0;
 let state = "study";
@@ -73,6 +74,71 @@ function formatTotalTime(sec) {
 function now() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+
+// ===============================
+// MEMÓRIA E ESTATÍSTICAS DIÁRIAS
+// ===============================
+const STATS_STORAGE_KEY = "focusTimerDailyStats";
+
+function getDateKey() {
+  const date = new Date();
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function loadDailyStats() {
+  try {
+    const savedStats = localStorage.getItem(STATS_STORAGE_KEY);
+
+    if (!savedStats) {
+      return {};
+    }
+
+    return JSON.parse(savedStats);
+  } catch (error) {
+    console.error("Erro ao carregar estatísticas:", error);
+    return {};
+  }
+}
+
+let dailyStats = loadDailyStats();
+
+function ensureTodayStats() {
+  const today = getDateKey();
+
+  if (!dailyStats[today]) {
+    dailyStats[today] = {
+      focus: 0,
+      distraction: 0,
+      paused: 0
+    };
+  }
+
+  return dailyStats[today];
+}
+
+function saveDailyStats() {
+  try {
+    localStorage.setItem(
+      STATS_STORAGE_KEY,
+      JSON.stringify(dailyStats)
+    );
+  } catch (error) {
+    console.error("Erro ao salvar estatísticas:", error);
+  }
+}
+
+function addDailyTime(type, seconds = 1) {
+  const todayStats = ensureTodayStats();
+
+  todayStats[type] += seconds;
+
+  saveDailyStats();
 }
 
 // ===============================
@@ -147,6 +213,7 @@ function updateUI() {
 function togglePause() {
   if (paused) {
     paused = false;
+    sessionHasStarted = true;
 
     if (state === "study" && studyTime === STUDY_TOTAL && !focusStartedLogged) {
       addHistory("Foco iniciado");
@@ -283,7 +350,13 @@ function startNextStudy(playSound = true, skipped = false) {
 // LOOP
 // ===============================
 setInterval(() => {
-  if (paused) return;
+  if (paused) {
+    if (sessionHasStarted) {
+      addDailyTime("paused", 1);
+    }
+
+    return;
+  }
 
   for (let i = 0; i < speed; i++) {
 
@@ -291,8 +364,12 @@ setInterval(() => {
       studyTime--;
       totalFocusSeconds++;
 
+      addDailyTime("focus", 1);
+
       if (totalFocusSeconds % 3600 === 0) {
-        addHistory(`⏱️ Foco total acumulado: ${formatTotalTime(totalFocusSeconds)}`);
+        addHistory(
+          `⏱️ Foco total acumulado: ${formatTotalTime(totalFocusSeconds)}`
+        );
       }
 
       if (studyTime <= 0) {
@@ -303,6 +380,7 @@ setInterval(() => {
     } else if (state === "break") {
 
       breakTime--;
+
       if (breakTime <= 0) {
         startNextStudy(true, false);
         break;
@@ -313,10 +391,13 @@ setInterval(() => {
       distractionTime++;
       totalDistractionSeconds++;
 
-      if (totalDistractionSeconds % 3600 === 0) {
-        addHistory(`🚨 Distração total acumulada: ${formatTotalTime(totalDistractionSeconds)}`);
-      }
+      addDailyTime("distraction", 1);
 
+      if (totalDistractionSeconds % 3600 === 0) {
+        addHistory(
+          `🚨 Distração total acumulada: ${formatTotalTime(totalDistractionSeconds)}`
+        );
+      }
     }
   }
 
