@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Focus Timer</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -9,32 +10,32 @@
 
   <div class="status" id="state">PAUSADO</div>
 
-  <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+  <div class="timer-area">
+    <div class="timer" id="studyTimer">60:00</div>
 
-    <div style="display:flex; align-items:baseline; gap:20px;">
-      <div class="timer" id="studyTimer">60:00</div>
+    <div class="progress-track" aria-label="Progresso do cronômetro">
+      <div class="progress-bar" id="progressBar"></div>
     </div>
 
-    <div style="display:flex; gap:25px; font-size:20px; opacity:0.85;">
+    <div class="totals">
       <div>⏱️ Foco Total: <span id="totalFocus">00:00</span></div>
       <div>🚨 Distração Total: <span id="totalDistraction">00:00</span></div>
     </div>
-
   </div>
 
-<div class="stats" style="gap:30px;">
-  <div class="stat red" style="display:flex; align-items:center; gap:6px;">
-    ⚠️ Distração
-    <span id="distractionTimer">00:00</span>
-  </div>
+  <div class="stats">
+    <div class="stat red stat-inline">
+      ⚠️ Distração
+      <span id="distractionTimer">00:00</span>
+    </div>
 
-  <div class="stat green" style="display:flex; align-items:center; gap:6px;">
-    🔄 Ciclos
-    <span>
-      <span id="pomodoros">0</span>/<span id="pomodoroMax">4</span>
-    </span>
+    <div class="stat green stat-inline">
+      🔄 Ciclos
+      <span>
+        <span id="pomodoros">0</span>/<span id="pomodoroMax">4</span>
+      </span>
+    </div>
   </div>
-</div>
 
   <div class="controls">
     <button id="distractBtn" class="danger" onclick="distract()">☕ Me Distrai</button>
@@ -46,23 +47,55 @@
     <button class="ghost" onclick="togglePiP()">🗔 PiP</button>
   </div>
 
-  <div style="margin-bottom:15px;">
+  <div class="settings-panel">
+    <h3>Configurar tempos</h3>
+
+    <div class="settings-grid">
+      <label>
+        Foco (min)
+        <input id="studyMinutesInput" type="number" min="1" max="1440" value="60">
+      </label>
+
+      <label>
+        Descanso curto (min)
+        <input id="shortBreakInput" type="number" min="1" max="1440" value="10">
+      </label>
+
+      <label>
+        Descanso longo (min)
+        <input id="longBreakInput" type="number" min="1" max="1440" value="30">
+      </label>
+
+      <label>
+        Ciclos até descanso longo
+        <input id="pomodoroMaxInput" type="number" min="1" max="100" value="4">
+      </label>
+    </div>
+
+    <button class="success apply-settings" onclick="applyTimerSettings()">
+      Aplicar tempos
+    </button>
+
+    <div class="settings-message" id="settingsMessage"></div>
+  </div>
+
+  <div class="option-row">
     ⚙️ Início automático:
     <button class="ghost" onclick="toggleAutoStart()" id="autoStartBtn">OFF</button>
   </div>
 
-  <div style="margin-bottom:20px;">
+  <div class="option-row">
     ⏩ Velocidade:
     <select onchange="setSpeed(this.value)">
       <option value="1">1x</option>
       <option value="10">10x</option>
-      <option value="60">1min</option> 
+      <option value="60">1min</option>
       <option value="300">5min</option>
     </select>
   </div>
 
   <div class="history">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="history-header">
       <h3>Histórico</h3>
       <button class="ghost" onclick="clearHistory()">🗑 Limpar</button>
     </div>
