@@ -7,7 +7,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 40px;
+  padding: 40px 20px;
+  box-sizing: border-box;
 }
 
 .status {
@@ -17,21 +18,65 @@ body {
   margin-bottom: 30px;
 }
 
+.timer-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(720px, 100%);
+}
+
 .timer {
-  font-size: 120px;
+  font-size: clamp(72px, 12vw, 120px);
+  line-height: 1;
   color: #20e070;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+}
+
+.progress-track {
+  width: min(620px, 90vw);
+  height: 12px;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: #20e070;
+  border-radius: inherit;
+  transition: width 0.35s linear, background-color 0.2s ease;
+}
+
+.totals {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  font-size: 20px;
+  opacity: 0.85;
 }
 
 .stats {
   display: flex;
-  gap: 50px;
-  margin-bottom: 30px;
-  align-items: center; /* 🔥 isso garante alinhamento vertical */
+  gap: 30px;
+  margin: 30px 0;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .stat {
   text-align: center;
+}
+
+.stat-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .stat span {
@@ -39,13 +84,20 @@ body {
   margin-top: 0;
 }
 
-.red span { color: #ff4d4d; }
-.green span { color: #20e070; }
+.red span {
+  color: #ff4d4d;
+}
+
+.green span {
+  color: #20e070;
+}
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 15px;
-  margin-bottom: 40px;
+  margin-bottom: 25px;
 }
 
 button {
@@ -56,16 +108,90 @@ button {
   cursor: pointer;
 }
 
-.danger { background: #e74c3c; color: white; }
-.success { background: #20e070; color: #063; }
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.success {
+  background: #20e070;
+  color: #063;
+}
+
 .ghost {
   background: #111;
   color: #aaa;
   border: 1px solid #333;
 }
 
+.settings-panel {
+  width: min(620px, 100%);
+  background: rgba(17, 17, 17, 0.82);
+  border: 1px solid #2c2c2c;
+  border-radius: 14px;
+  padding: 18px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.settings-panel h3 {
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.settings-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.settings-grid input,
+select {
+  background: #0c0c0c;
+  color: #eaeaea;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 15px;
+}
+
+.apply-settings {
+  display: block;
+  margin: 16px auto 0;
+}
+
+.settings-message {
+  min-height: 20px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.option-row {
+  margin-bottom: 15px;
+}
+
 .history {
-  width: 320px;
+  width: min(420px, 100%);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .history ul {
@@ -77,4 +203,25 @@ button {
   font-size: 13px;
   padding: 6px 0;
   border-bottom: 1px solid #222;
+}
+
+@media (max-width: 600px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .totals {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+  }
+
+  .controls {
+    gap: 10px;
+  }
+
+  button {
+    padding: 12px 16px;
+  }
 }
