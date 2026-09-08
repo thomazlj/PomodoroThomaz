@@ -301,3 +301,49 @@ select {
     margin: 0 auto 12px;
   }
 }
+
+
+/* ===== CORREÇÃO FINAL DE CENTRALIZAÇÃO =====
+   O bloco principal fica centralizado na tela independentemente
+   do painel de configuração. O painel fica à esquerda. */
+
+.workspace {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.main-column {
+  width: min(650px, 100%);
+  margin: 0 auto;
+  min-width: 0;
+}
+
+.compact-settings {
+  position: absolute;
+  top: 35px;
+  right: calc(50% + 350px);
+  width: 190px;
+  margin: 0;
+}
+
+/* Em telas menores, o painel volta para o fluxo normal */
+@media (max-width: 1100px) {
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .compact-settings {
+    position: static;
+    width: 190px;
+    margin: 10px auto 18px;
+    order: -1;
+  }
+
+  .main-column {
+    width: min(650px, 100%);
+    margin: 0 auto;
+  }
+}
