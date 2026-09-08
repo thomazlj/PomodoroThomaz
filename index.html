@@ -10,69 +10,65 @@
 
   <div class="status" id="state">PAUSADO</div>
 
-  <div class="top-layout">
+  <div class="workspace">
     <div class="main-column">
+      <div class="timer-area">
+        <div class="timer" id="studyTimer">60:00</div>
 
-  <div class="timer-area">
-    <div class="timer" id="studyTimer">60:00</div>
+        <div class="progress-track" aria-label="Progresso do cronômetro">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
 
-    <div class="progress-track" aria-label="Progresso do cronômetro">
-      <div class="progress-bar" id="progressBar"></div>
+        <div class="totals">
+          <div>⏱️ Foco Total: <span id="totalFocus">00:00</span></div>
+          <div>🚨 Distração Total: <span id="totalDistraction">00:00</span></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat red stat-inline">
+          ⚠️ Distração
+          <span id="distractionTimer">00:00</span>
+        </div>
+
+        <div class="stat green stat-inline">
+          🔄 Ciclos
+          <span>
+            <span id="pomodoros">0</span>/<span id="pomodoroMax">4</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="distractBtn" class="danger" onclick="distract()">☕ Me Distrai</button>
+        <button id="focusBtn" class="success" onclick="returnToFocus()">▶️ Voltar a Focar</button>
+        <button id="skipFocusBtn" class="ghost" onclick="skipFocus()">⏭ Pular Foco</button>
+        <button id="skipBreakBtn" class="ghost" onclick="skipBreak()">⏭ Pular Descanso</button>
+        <button class="ghost" onclick="togglePause()">⏯</button>
+        <button class="ghost" onclick="resetAll()">↻</button>
+        <button class="ghost" onclick="togglePiP()">🗔 PiP</button>
+      </div>
     </div>
 
-    <div class="totals">
-      <div>⏱️ Foco Total: <span id="totalFocus">00:00</span></div>
-      <div>🚨 Distração Total: <span id="totalDistraction">00:00</span></div>
-    </div>
-  </div>
-
-  <div class="stats">
-    <div class="stat red stat-inline">
-      ⚠️ Distração
-      <span id="distractionTimer">00:00</span>
-    </div>
-
-    <div class="stat green stat-inline">
-      🔄 Ciclos
-      <span>
-        <span id="pomodoros">0</span>/<span id="pomodoroMax">4</span>
-      </span>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button id="distractBtn" class="danger" onclick="distract()">☕ Me Distrai</button>
-    <button id="focusBtn" class="success" onclick="returnToFocus()">▶️ Voltar a Focar</button>
-    <button id="skipFocusBtn" class="ghost" onclick="skipFocus()">⏭ Pular Foco</button>
-    <button id="skipBreakBtn" class="ghost" onclick="skipBreak()">⏭ Pular Descanso</button>
-    <button class="ghost" onclick="togglePause()">⏯</button>
-    <button class="ghost" onclick="resetAll()">↻</button>
-    <button class="ghost" onclick="togglePiP()">🗔 PiP</button>
-  </div>
-
-    </div>
-
-    <div class="settings-panel">
-      <h3>Configurar tempos</h3>
-
+    <div class="settings-panel compact-settings">
       <div class="settings-grid">
         <label>
-          Foco
+          <span>Foco</span>
           <input id="studyMinutesInput" type="number" min="1" max="1440" value="60">
         </label>
 
         <label>
-          Descanso curto
+          <span>Curto</span>
           <input id="shortBreakInput" type="number" min="1" max="1440" value="10">
         </label>
 
         <label>
-          Descanso longo
+          <span>Longo</span>
           <input id="longBreakInput" type="number" min="1" max="1440" value="30">
         </label>
 
         <label>
-          Ciclos
+          <span>Ciclos</span>
           <input id="pomodoroMaxInput" type="number" min="1" max="100" value="4">
         </label>
       </div>
