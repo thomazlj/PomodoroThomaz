@@ -88,7 +88,7 @@
 
   <div class="option-row">
     ⏩ Velocidade:
-    <select onchange="setSpeed(this.value)">
+    <select id="speedSelect" onchange="setSpeed(this.value)">
       <option value="1">1x</option>
       <option value="10">10x</option>
       <option value="60">1min</option>
@@ -103,6 +103,95 @@
     </div>
     <ul id="historyList"></ul>
   </div>
+
+  <section class="analytics" aria-labelledby="analyticsTitle">
+    <div class="analytics-heading">
+      <div>
+        <p class="section-kicker">ACOMPANHAMENTO</p>
+        <h2 id="analyticsTitle">Estatísticas de foco</h2>
+      </div>
+      <button class="ghost" onclick="exportStatsCsv()">⬇ Exportar CSV</button>
+    </div>
+
+    <div class="analytics-grid">
+      <article class="metric-card">
+        <span class="metric-label">Hoje</span>
+        <strong id="metricToday">00:00</strong>
+        <small id="metricTodayDetail">0 pomodoros</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Ontem</span>
+        <strong id="metricYesterday">00:00</strong>
+        <small id="metricYesterdayDetail">0 pomodoros</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Esta semana</span>
+        <strong id="metricWeek">00:00</strong>
+        <small id="metricWeekDetail">0 pomodoros</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Este mês</span>
+        <strong id="metricMonth">00:00</strong>
+        <small id="metricMonthDetail">0 pomodoros</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Média por dia ativo</span>
+        <strong id="metricAverage">00:00</strong>
+        <small id="metricAverageDetail">0 dias registrados</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Melhor dia</span>
+        <strong id="metricBest">00:00</strong>
+        <small id="metricBestDetail">—</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Pomodoros concluídos</span>
+        <strong id="metricPomodoros">0</strong>
+        <small>total registrado</small>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Taxa de foco</span>
+        <strong id="metricFocusRate">—</strong>
+        <small>foco ÷ (foco + distração)</small>
+      </article>
+    </div>
+
+    <div class="period-details">
+      <div><span>Foco no mês</span><strong id="monthFocusDetail">00:00</strong></div>
+      <div><span>Distração no mês</span><strong id="monthDistractionDetail">00:00</strong></div>
+      <div><span>Pausado no mês</span><strong id="monthPausedDetail">00:00</strong></div>
+    </div>
+
+    <div class="daily-table-wrap">
+      <div class="daily-table-heading">
+        <h3>Histórico diário</h3>
+        <span>Os dados ficam salvos neste navegador.</span>
+      </div>
+
+      <div class="table-scroll">
+        <table class="daily-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Foco</th>
+              <th>Distração</th>
+              <th>Pausado</th>
+              <th>Pomodoros</th>
+              <th>Taxa de foco</th>
+            </tr>
+          </thead>
+          <tbody id="dailyStatsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
   <video id="pipVideo" muted playsinline style="display:none;"></video>
 
