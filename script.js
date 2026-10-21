@@ -187,9 +187,16 @@ function ensureTodayStats() {
     dailyStats[today] = {
       focus: 0,
       distraction: 0,
-      paused: 0
+      paused: 0,
+      pomodoros: 0
     };
   }
+
+  // Compatibilidade com dados salvos por versões anteriores.
+  dailyStats[today].focus = Number(dailyStats[today].focus) || 0;
+  dailyStats[today].distraction = Number(dailyStats[today].distraction) || 0;
+  dailyStats[today].paused = Number(dailyStats[today].paused) || 0;
+  dailyStats[today].pomodoros = Number(dailyStats[today].pomodoros) || 0;
 
   return dailyStats[today];
 }
@@ -215,23 +222,403 @@ totalFocusSeconds = todayStatsOnLoad.focus || 0;
 totalDistractionSeconds = todayStatsOnLoad.distraction || 0;
 
 // ===============================
-// HISTÓRICO
+// HISTÓRICO PERSISTENTE
 // ===============================
-function addHistory(text) {
-  const li = document.createElement("li");
+const HISTORY_STORAGE_KEY = "focusTimerHistory";
+const MAX_HISTORY_ITEMS = 1000;
 
-  li.textContent = `${now()} — ${text}`;
-  document.getElementById("historyList").prepend(li);
+function loadHistory() {
+  try {
+    const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (error) {
+    console.error("Erro ao carregar histórico:", error);
+    return [];
+  }
+}
+
+let historyEntries = loadHistory();
+
+function saveHistory() {
+  try {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(historyEntries));
+  } catch (error) {
+    console.error("Erro ao salvar histórico:", error);
+  }
+}
+
+function formatHistoryTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const today = new Date();
+  const sameDay =
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate();
+
+  const time = `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes()
+  ).padStart(2, "0")}`;
+
+  if (sameDay) {
+    return time;
+  }
+
+  return `${String(date.getDate()).padStart(2, "0")}/${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")} ${time}`;
+}
+
+function renderHistory() {
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+
+  historyEntries.forEach((entry) => {
+    const li = document.createElement("li");
+    li.textContent = `${formatHistoryTimestamp(entry.timestamp)} — ${entry.text}`;
+    list.appendChild(li);
+  });
+}
+
+function addHistory(text) {
+  historyEntries.unshift({
+    timestamp: new Date().toISOString(),
+    text
+  });
+
+  if (historyEntries.length > MAX_HISTORY_ITEMS) {
+    historyEntries = historyEntries.slice(0, MAX_HISTORY_ITEMS);
+  }
+
+  saveHistory();
+  renderHistory();
 }
 
 function clearHistory() {
-  document.getElementById("historyList").innerHTML = "";
+  historyEntries = [];
+  saveHistory();
+  renderHistory();
+}
+
+// ===============================
+// ESTADO ATUAL DO CRONÔMETRO
+// ===============================
+const SESSION_STORAGE_KEY = "focusTimerSessionState";
+
+function saveSessionState() {
+  try {
+    const sessionState = {
+      studyTime,
+      breakTime,
+      distractionTime,
+      pomodoros,
+      state,
+      paused,
+      speed,
+      autoStart,
+      focusStartedLogged,
+      breakStartedLogged,
+      isLongBreak,
+      sessionHasStarted
+    };
+
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionState));
+  } catch (error) {
+    console.error("Erro ao salvar estado do cronômetro:", error);
+  }
+}
+
+function loadSessionState() {
+  try {
+    const saved = localStorage.getItem(SESSION_STORAGE_KEY);
+
+    if (!saved) {
+      return;
+    }
+
+    const parsed = JSON.parse(saved);
+
+    studyTime = Number.isFinite(Number(parsed.studyTime))
+      ? Math.max(0, Number(parsed.studyTime))
+      : STUDY_TOTAL;
+    breakTime = Number.isFinite(Number(parsed.breakTime))
+      ? Math.max(0, Number(parsed.breakTime))
+      : SHORT_BREAK;
+    distractionTime = Number(parsed.distractionTime) || 0;
+    pomodoros = Number(parsed.pomodoros) || 0;
+    state = ["study", "break", "distracted"].includes(parsed.state)
+      ? parsed.state
+      : "study";
+    paused = Boolean(parsed.paused);
+    speed = Number(parsed.speed) || 1;
+    autoStart = Boolean(parsed.autoStart);
+    focusStartedLogged = Boolean(parsed.focusStartedLogged);
+    breakStartedLogged = Boolean(parsed.breakStartedLogged);
+    isLongBreak = Boolean(parsed.isLongBreak);
+    sessionHasStarted = Boolean(parsed.sessionHasStarted);
+  } catch (error) {
+    console.error("Erro ao restaurar estado do cronômetro:", error);
+  }
+}
+
+// ===============================
+// PAINEL DE ESTATÍSTICAS
+// ===============================
+function parseDateKey(dateKey) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function dateToKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDateLabel(dateKey, includeYear = false) {
+  const date = parseDateKey(dateKey);
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    ...(includeYear ? { year: "numeric" } : {})
+  });
+}
+
+function getStatsForKey(dateKey) {
+  const stats = dailyStats[dateKey] || {};
+  return {
+    focus: Number(stats.focus) || 0,
+    distraction: Number(stats.distraction) || 0,
+    paused: Number(stats.paused) || 0,
+    pomodoros: Number(stats.pomodoros) || 0
+  };
+}
+
+function sumStats(keys) {
+  return keys.reduce(
+    (total, key) => {
+      const stats = getStatsForKey(key);
+      total.focus += stats.focus;
+      total.distraction += stats.distraction;
+      total.paused += stats.paused;
+      total.pomodoros += stats.pomodoros;
+      return total;
+    },
+    { focus: 0, distraction: 0, paused: 0, pomodoros: 0 }
+  );
+}
+
+function getSortedStatKeys() {
+  return Object.keys(dailyStats)
+    .filter((key) => /^\d{4}-\d{2}-\d{2}$/.test(key))
+    .sort((a, b) => b.localeCompare(a));
+}
+
+function getWeekKeys() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const day = today.getDay();
+  const daysSinceMonday = (day + 6) % 7;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - daysSinceMonday);
+
+  return getSortedStatKeys().filter((key) => {
+    const date = parseDateKey(key);
+    return date >= monday && date <= today;
+  });
+}
+
+function getMonthKeys() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  return getSortedStatKeys().filter((key) => {
+    const date = parseDateKey(key);
+    return date.getFullYear() === year && date.getMonth() === month;
+  });
+}
+
+function focusRate(stats) {
+  const productiveTime = stats.focus + stats.distraction;
+  if (productiveTime <= 0) {
+    return null;
+  }
+  return (stats.focus / productiveTime) * 100;
+}
+
+function formatPercent(value) {
+  return value === null ? "—" : `${value.toFixed(1)}%`;
+}
+
+function renderDailyStatsTable() {
+  const body = document.getElementById("dailyStatsBody");
+  if (!body) return;
+
+  const keys = getSortedStatKeys();
+  body.innerHTML = "";
+
+  const activeKeys = keys.filter((key) => {
+    const stats = getStatsForKey(key);
+    return stats.focus || stats.distraction || stats.paused || stats.pomodoros;
+  });
+
+  if (activeKeys.length === 0) {
+    body.innerHTML =
+      '<tr><td class="empty-stats" colspan="6">Ainda não há dados registrados.</td></tr>';
+    return;
+  }
+
+  activeKeys.forEach((key) => {
+    const stats = getStatsForKey(key);
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${formatDateLabel(key, true)}</td>
+      <td>${formatTotalTime(stats.focus)}</td>
+      <td>${formatTotalTime(stats.distraction)}</td>
+      <td>${formatTotalTime(stats.paused)}</td>
+      <td>${stats.pomodoros}</td>
+      <td>${formatPercent(focusRate(stats))}</td>
+    `;
+    body.appendChild(row);
+  });
+}
+
+function renderAnalytics() {
+  const todayKey = getDateKey();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = dateToKey(yesterday);
+
+  const todayStats = getStatsForKey(todayKey);
+  const yesterdayStats = getStatsForKey(yesterdayKey);
+  const weekStats = sumStats(getWeekKeys());
+  const monthKeys = getMonthKeys();
+  const monthStats = sumStats(monthKeys);
+  const allKeys = getSortedStatKeys();
+  const allStats = sumStats(allKeys);
+
+  const activeMonthKeys = monthKeys.filter((key) => {
+    const stats = getStatsForKey(key);
+    return stats.focus > 0 || stats.distraction > 0 || stats.paused > 0;
+  });
+  const averageFocus =
+    activeMonthKeys.length > 0
+      ? Math.round(monthStats.focus / activeMonthKeys.length)
+      : 0;
+
+  let bestKey = null;
+  let bestFocus = 0;
+  allKeys.forEach((key) => {
+    const focus = getStatsForKey(key).focus;
+    if (focus > bestFocus) {
+      bestFocus = focus;
+      bestKey = key;
+    }
+  });
+
+  document.getElementById("metricToday").textContent = formatTotalTime(
+    todayStats.focus
+  );
+  document.getElementById("metricTodayDetail").textContent = `${todayStats.pomodoros} pomodoro${
+    todayStats.pomodoros === 1 ? "" : "s"
+  }`;
+
+  document.getElementById("metricYesterday").textContent = formatTotalTime(
+    yesterdayStats.focus
+  );
+  document.getElementById("metricYesterdayDetail").textContent = `${yesterdayStats.pomodoros} pomodoro${
+    yesterdayStats.pomodoros === 1 ? "" : "s"
+  }`;
+
+  document.getElementById("metricWeek").textContent = formatTotalTime(
+    weekStats.focus
+  );
+  document.getElementById("metricWeekDetail").textContent = `${weekStats.pomodoros} pomodoro${
+    weekStats.pomodoros === 1 ? "" : "s"
+  }`;
+
+  document.getElementById("metricMonth").textContent = formatTotalTime(
+    monthStats.focus
+  );
+  document.getElementById("metricMonthDetail").textContent = `${monthStats.pomodoros} pomodoro${
+    monthStats.pomodoros === 1 ? "" : "s"
+  }`;
+
+  document.getElementById("metricAverage").textContent = formatTotalTime(
+    averageFocus
+  );
+  document.getElementById("metricAverageDetail").textContent = `${activeMonthKeys.length} dia${
+    activeMonthKeys.length === 1 ? "" : "s"
+  } registrado${activeMonthKeys.length === 1 ? "" : "s"} no mês`;
+
+  document.getElementById("metricBest").textContent = formatTotalTime(bestFocus);
+  document.getElementById("metricBestDetail").textContent = bestKey
+    ? formatDateLabel(bestKey, true)
+    : "—";
+
+  document.getElementById("metricPomodoros").textContent = allStats.pomodoros;
+  document.getElementById("metricFocusRate").textContent = formatPercent(
+    focusRate(allStats)
+  );
+
+  document.getElementById("monthFocusDetail").textContent = formatTotalTime(
+    monthStats.focus
+  );
+  document.getElementById("monthDistractionDetail").textContent =
+    formatTotalTime(monthStats.distraction);
+  document.getElementById("monthPausedDetail").textContent = formatTotalTime(
+    monthStats.paused
+  );
+
+  renderDailyStatsTable();
+}
+
+function exportStatsCsv() {
+  const keys = getSortedStatKeys();
+  const header = [
+    "Data",
+    "Foco (segundos)",
+    "Distração (segundos)",
+    "Pausado (segundos)",
+    "Pomodoros",
+    "Taxa de foco (%)"
+  ];
+
+  const rows = keys.map((key) => {
+    const stats = getStatsForKey(key);
+    const rate = focusRate(stats);
+    return [
+      key,
+      stats.focus,
+      stats.distraction,
+      stats.paused,
+      stats.pomodoros,
+      rate === null ? "" : rate.toFixed(1)
+    ];
+  });
+
+  const csv = [header, ...rows]
+    .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `focus-timer-estatisticas-${getDateKey()}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 // ===============================
 // CONFIGURAÇÕES VISÍVEIS
 // ===============================
 function fillSettingsInputs() {
+  document.getElementById("speedSelect").value = String(speed);
+
   document.getElementById("studyMinutesInput").value =
     timerSettings.studyMinutes;
   document.getElementById("shortBreakInput").value =
@@ -404,6 +791,8 @@ function updateUI() {
   updateProgressBar();
   updateDocumentTitle();
   drawPiP();
+  renderAnalytics();
+  saveSessionState();
 }
 
 // ===============================
@@ -523,6 +912,13 @@ function startBreak(playSound = true, skipped = false) {
   }
 
   pomodoros++;
+
+  if (!skipped) {
+    const todayStats = ensureTodayStats();
+    todayStats.pomodoros += 1;
+    saveDailyStats();
+  }
+
   isLongBreak = pomodoros % POMODORO_MAX === 0;
   breakTime = isLongBreak ? LONG_BREAK : SHORT_BREAK;
 
@@ -675,5 +1071,7 @@ async function togglePiP() {
   }
 }
 
+loadSessionState();
+renderHistory();
 fillSettingsInputs();
 updateUI();
