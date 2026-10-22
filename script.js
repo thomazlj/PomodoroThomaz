@@ -85,12 +85,23 @@ function beep(duration = 200, frequency = 880, volume = 0.2) {
 }
 
 function focusEndSound() {
-  beep(200, 880);
-  setTimeout(() => beep(200, 880), 300);
+  const repetitions = 5;
+
+  for (let i = 0; i < repetitions; i++) {
+    setTimeout(() => {
+      beep(600, 880, 0.25);
+    }, i * 900);
+  }
 }
 
 function breakEndSound() {
-  beep(500, 523);
+  const repetitions = 4;
+
+  for (let i = 0; i < repetitions; i++) {
+    setTimeout(() => {
+      beep(600, 523, 0.25);
+    }, i * 900);
+  }
 }
 
 // ===============================
